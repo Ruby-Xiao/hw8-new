@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Smart Weather Info</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        /* 背景視頻樣式 */
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        video#bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        /* 輸入框與天氣區域樣式 */
+        .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 天氣資訊方框 */
+        #weather-status {
+            display: none;
+            background-color: rgba(128, 128, 128, 0.5); /* 灰色背景，透明度50% */
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            margin-top: 20px;
+        }
+
+        img {
+            width: 100px;
+            height: auto;
+        }
+
+        h1, h3 {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 背景視頻 -->
+    <video id="bg-video" autoplay muted loop>
+        <source src="1219.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <!-- 主要內容 -->
+    <div class="container">
+        <!-- 輸入框 -->
+        <form class="col-md-6 m-auto py-5">
+            <div class="input-group mb-3">
+                <input id="input-value" type="text" class="form-control" placeholder="Enter a location for Weather ...">
+                <div class="input-group-append">
+                    <button onclick="loadTemparatureData()" type="button" class="btn btn-danger">Search</button>
+                </div>
+            </div>
+        </form>
+        <!-- 天氣資訊區域 -->
+        <div id="weather-status" class="text-center"></div>
+    </div>
+
+    <!-- JavaScript 檔案 -->
+    <script>
+        const loadTemparatureData = () => {
+            const key = "a1d9c445802e1d4ceb6f9b29e5cb97cd";
+            const inputValue = document.getElementById('input-value');
+            const weatherStatus = document.getElementById('weather-status');
+
+            if (inputValue.value.trim() === '') {
+                console.log('Input city name');
+                alert("Please enter a city name!");
+            } else {
+                fetch(`https://api.openweathermap.org/data/2.5/weather?q=${inputValue.value}&appid=${key}`)
+                    .then(res => res.json())
+                    .then(data => displayTemparature(data))
+                    .catch(err => console.error("Error fetching data:", err));
+            }
+            inputValue.value = ''; // 清空輸入框
+            weatherStatus.innerHTML = ''; // 清空現有資訊
+        }
+
+        const displayTemparature = (data) => {
+            const weatherStatus = document.getElementById('weather-status');
+            const weatherInfo = document.createElement('div');
+
+            // 取得日出日落時間
+            const sunriseTime = new Date(data.sys.sunrise * 1000).toLocaleTimeString();
+            const sunsetTime = new Date(data.sys.sunset * 1000).toLocaleTimeString();
+
+            // 顯示天氣資訊
+            weatherInfo.innerHTML = `
+                <img src="https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png" alt="Weather Icon">
+                <h1 id="city-name">${data.name}</h1>
+                <h3><span id="celcius-number">${((data.main.temp) - 273.15).toFixed(2)}</span>&deg;C</h3>
+                <h3 class="lead">Sunrise: ${sunriseTime}</h3>
+                <h3 class="lead">Sunset: ${sunsetTime}</h3>
+            `;
+
+            // 清空並顯示天氣資訊
+            weatherStatus.innerHTML = '';
+            weatherStatus.appendChild(weatherInfo);
+            weatherStatus.style.display = 'block'; // 顯示區域
+};
+
+    </script>
+</body>
+
+</html>
